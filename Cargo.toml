@@ -1,6 +1,6 @@
 [package]
 name = "pdftotext"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Elias Gabriel Amaral da Silva <tolkiendili@gmail.com>"]
 edition = "2018"
 license = "GPL-2.0 OR GPL-3.0"
@@ -14,6 +14,12 @@ High-level library that binds to Poppler to extract text from a PDF
 keywords = ["poppler", "pdf", "text"]
 categories = ["api-bindings"]
 
+[features]
+default = []
+static-poppler = ["cmake"]
+
+
 [build-dependencies]
 cc = "1.0"
 pkg-config = "0.3"
+cmake = { version = "0.1", optional = true }

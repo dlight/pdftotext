@@ -79,11 +79,7 @@ extern "C" ResultCode pdftotext_print_with_layout(char *filename, void * stream,
         return CouldntReadPdf;
     }
 
-    TextOutputDev* textOut = new TextOutputDev(nullptr, true, 0.0, false, false, false);
-
-    if (!textOut->isOk()) {
-        return CouldntOutput;
-    }
+    TextOutputDev* textOut;
 
     int lastPage = doc->getNumPages();
 
@@ -92,10 +88,18 @@ extern "C" ResultCode pdftotext_print_with_layout(char *filename, void * stream,
     for (int pageNum = 1; pageNum <= lastPage; pageNum++) {
         newpage_f(stream, pageNum);
 
+        textOut = new TextOutputDev(nullptr, true, 0.0, false, false, false);
+
+        if (!textOut->isOk()) {
+            return CouldntOutput;
+        }
+
         doc->displayPage(textOut, pageNum, 72.0, 72.0, 0, true, false, false);
 
         TextPage *page = textOut->takeText();
         page->dump(stream, output_f, true, eolUnix, false);
+
+        delete textOut;
     }
 
     return NoError;
