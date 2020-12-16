@@ -15,7 +15,7 @@ keywords = ["poppler", "pdf", "text"]
 categories = ["api-bindings"]
 
 [features]
-default = []
+default = ["static-poppler"]
 static-poppler = ["cmake"]
 
 

@@ -83,8 +83,6 @@ extern "C" ResultCode pdftotext_print_with_layout(char *filename, void * stream,
 
     int lastPage = doc->getNumPages();
 
-    textOut->setTextEOL(eolUnix);
-
     for (int pageNum = 1; pageNum <= lastPage; pageNum++) {
         newpage_f(stream, pageNum);
 
@@ -93,6 +91,8 @@ extern "C" ResultCode pdftotext_print_with_layout(char *filename, void * stream,
         if (!textOut->isOk()) {
             return CouldntOutput;
         }
+
+        textOut->setTextEOL(eolUnix);
 
         doc->displayPage(textOut, pageNum, 72.0, 72.0, 0, true, false, false);
 

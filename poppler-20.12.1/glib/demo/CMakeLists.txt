@@ -1,0 +1,35 @@
+include_directories(
+  SYSTEM
+  ${GTK3_INCLUDE_DIRS}
+)
+
+add_definitions(${GTK3_CFLAGS_OTHER})
+
+set(poppler_glib_demo_SRCS
+  main.c
+  find.c
+  fonts.c
+  forms.c
+  info.cc
+  images.c
+  links.c
+  outline.c
+  page.c
+  print.c
+  render.c
+  text.c
+  transitions.c
+  utils.c
+  annots.c
+  attachments.c
+  layers.c
+  selections.c
+  taggedstruct.c
+)
+poppler_add_test(poppler-glib-demo BUILD_GTK_TESTS ${poppler_glib_demo_SRCS})
+
+if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
+    target_link_libraries(poppler-glib-demo ${CAIRO_LIBRARIES} poppler-glib ${GTK3_LIBRARIES})
+else()
+    target_link_libraries(poppler-glib-demo ${CAIRO_LIBRARIES} poppler-glib PkgConfig::GTK3)
+endif()
