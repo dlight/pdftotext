@@ -1,6 +1,9 @@
 #![allow(dead_code)]
 
-use std::{ffi::CString, os::raw::{c_char, c_int, c_void}};
+use std::{
+    ffi::CString,
+    os::raw::{c_char, c_int, c_void},
+};
 
 use std::fmt;
 
@@ -12,7 +15,6 @@ enum ResultCode {
     CouldntOutput = 3,
 }
 
-
 #[derive(Debug)]
 pub enum Error {
     InternalError,
@@ -20,11 +22,12 @@ pub enum Error {
     CouldntOutput,
 }
 
-
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let str = match self {
-            Error::InternalError => "Could not get text encoding, something about poppler is broken",
+            Error::InternalError => {
+                "Could not get text encoding, something about poppler is broken"
+            }
             Error::CouldntReadPdf => "Could not read PDF file",
             Error::CouldntOutput => "Could not create text output",
         };
@@ -32,15 +35,19 @@ impl fmt::Display for Error {
     }
 }
 
-impl std::error::Error for Error {
-}
+impl std::error::Error for Error {}
 
-type NewPageFunc = extern "C" fn (stream: *mut c_void, page: c_int);
+type NewPageFunc = extern "C" fn(stream: *mut c_void, page: c_int);
 
-type TextOutputFunc = extern "C" fn (stream: *mut c_void, text: *const c_char, len: c_int);
+type TextOutputFunc = extern "C" fn(stream: *mut c_void, text: *const c_char, len: c_int);
 
 extern "C" {
-    fn pdftotext_print_with_layout(filename: *const c_char, stream: *mut c_void, newpage_f: NewPageFunc, output_f: TextOutputFunc) -> ResultCode;
+    fn pdftotext_print_with_layout(
+        filename: *const c_char,
+        stream: *mut c_void,
+        newpage_f: NewPageFunc,
+        output_f: TextOutputFunc,
+    ) -> ResultCode;
 }
 
 extern "C" fn newpage_callback(stream: *mut c_void, page: c_int) {
@@ -49,7 +56,7 @@ extern "C" fn newpage_callback(stream: *mut c_void, page: c_int) {
 
     let page = page as usize;
 
-    assert!(page-1 <= vec.len());
+    assert!(page - 1 <= vec.len());
 
     if page > vec.len() {
         vec.push(String::new());
@@ -74,7 +81,14 @@ pub fn pdftotext_layout(filename: &str) -> Result<Vec<String>, Error> {
 
     let c_filename = CString::new(filename).unwrap();
 
-    let _ = unsafe { pdftotext_print_with_layout(c_filename.as_ptr(), &mut vec as *mut Vec<String> as *mut c_void, newpage_callback, output_callback) };
+    let _ = unsafe {
+        pdftotext_print_with_layout(
+            c_filename.as_ptr(),
+            &mut vec as *mut Vec<String> as *mut c_void,
+            newpage_callback,
+            output_callback,
+        )
+    };
 
     Ok(vec)
 }

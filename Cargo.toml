@@ -1,6 +1,6 @@
 [package]
 name = "pdftotext"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Elias Gabriel Amaral da Silva <tolkiendili@gmail.com>"]
 edition = "2018"
 license = "GPL-2.0 OR GPL-3.0"
@@ -15,7 +15,7 @@ keywords = ["poppler", "pdf", "text"]
 categories = ["api-bindings"]
 
 [features]
-default = ["static-poppler"]
+default = []
 static-poppler = ["cmake"]
 
 

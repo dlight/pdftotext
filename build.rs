@@ -1,10 +1,6 @@
-fn main() {
-    if let Ok(_) = std::env::var("DOCS_RS") {
-        return;
-    }
-
-    if cfg!(feature = "static-poppler") {
-        let static_build = cmake::Config::new("poppler-20.12.1")
+#[cfg(feature = "static-poppler")]
+fn setup(callpoppler: &mut cc::Build) -> &mut cc::Build {
+    let static_build = cmake::Config::new("poppler-20.12.1")
         .define("BUILD_SHARED_LIBS", "OFF")
         .define("BUILD_GTK_TESTS", "OFF")
         .define("BUILD_QT5_TESTS", "OFF")
@@ -33,28 +29,50 @@ fn main() {
         .define("WITH_FONTCONFIGURATION_FONTCONFIG", "OFF")
         .define("RUN_GPERF_IF_PRESENT", "OFF")
         .build();
-        
-        println!("cargo:rustc-link-search=native={}/build", static_build.display());
-        println!("cargo:rustc-link-lib=static=poppler");
-    }
 
-        let poppler = pkg_config::Config::new()
+    println!(
+        "cargo:rustc-link-search=native={}/build",
+        static_build.display()
+    );
+    println!("cargo:rustc-link-lib=static=poppler");
+
+    let base = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+
+    let dir = std::path::Path::new(&base).join("poppler-20.12.1/poppler");
+
+    let dir_config = std::path::Path::new(&static_build).join("build/poppler");
+
+    let callpoppler = callpoppler.include(dir).include(dir_config);
+
+    callpoppler
+}
+
+#[cfg(not(feature = "static-poppler"))]
+fn setup(mut callpoppler: &mut cc::Build) -> &mut cc::Build {
+    let poppler = pkg_config::Config::new()
         .cargo_metadata(true)
         .probe("poppler")
         .expect("pkg-config could not find poppler");
 
-        let mut build = cc::Build::new();
+    for dir in &poppler.include_paths {
+        callpoppler = callpoppler.include(dir);
+    }
 
-        let mut callpoppler = build
-            .cpp(true)
-            .file("src/callpoppler.cc");
-        
-        for dir in &poppler.include_paths {
-            callpoppler = callpoppler.include(dir);
-        }
-        callpoppler.compile("callpoppler.a");
+    callpoppler
+}
 
+fn main() {
+    if let Ok(_) = std::env::var("DOCS_RS") {
+        return;
+    }
 
+    let mut build = cc::Build::new();
+
+    let callpoppler = build.cpp(true).file("src/callpoppler.cc");
+
+    let callpoppler = setup(callpoppler);
+
+    callpoppler.compile("callpoppler.a");
 
     //shouldn't cc take care of this?
     println!("cargo:rerun-if-changed=src/callpoppler.cc");
