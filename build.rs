@@ -1,3 +1,9 @@
+#[cfg(doc)]
+fn main() {
+
+}
+
+#[cfg(not(doc))]
 fn main() {
     let poppler = pkg_config::Config::new()
     .cargo_metadata(true)
